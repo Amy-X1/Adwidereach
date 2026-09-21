@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+node_modules
+=======
 # Dependencies
 node_modules/
 .pnp/
@@ -71,3 +74,4 @@ build/
 *.pid
 *.seed
 *.pid.lock
+>>>>>>> 15f60e4b27445157773b04ae2ecd3aedad7c180f
