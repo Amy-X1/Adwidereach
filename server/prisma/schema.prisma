@@ -1,0 +1,352 @@
+// Prisma schema for the business application
+//
+// This ships configured for SQLite so the project runs locally with
+// zero external setup. For production, switch to PostgreSQL or MySQL:
+//
+//   datasource db {
+//     provider = "postgresql"        // or "mysql"
+//     url      = env("DATABASE_URL")
+//   }
+//
+// and set DATABASE_URL in .env, e.g.
+//   postgresql://user:password@localhost:5432/business_app?schema=public
+//
+// Note: enums are intentionally avoided (role/gender are validated Strings)
+// so this schema works unmodified across SQLite / PostgreSQL / MySQL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  fullName      String
+  username      String    @unique
+  email         String    @unique
+  phone         String
+  dob           DateTime
+  gender        String
+  country       String
+  state         String
+  city          String
+  businessName  String?
+  address       String
+  passwordHash  String
+  role          String    @default("USER") // USER | ADMIN
+  isActive      Boolean   @default(true)
+  avatarUrl     String?
+  walletBalance Decimal     @default(0)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  auditLogs      AuditLog[]
+  orders         Order[]
+  transactions   Transaction[]
+  supportTickets SupportTicket[]
+  assignedTickets SupportTicket[] @relation("TicketAssignee")
+  ticketMessages TicketMessage[] @relation("TicketMessageSender")
+  notifications  Notification[]
+  payments       Payment[]
+  affiliate      Affiliate?
+  referredBy     Referral?       @relation("ReferredUser")
+
+  @@index([email])
+  @@index([username])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  reply     String?
+  repliedAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Service {
+  id           Int      @id @default(autoincrement())
+  platform     String
+  name         String
+  description  String
+  imageUrl     String?
+  category     String?
+  requirements String? // JSON-encoded array of required fields
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  packages ServicePackage[]
+}
+
+model ServicePackage {
+  id           Int      @id @default(autoincrement())
+  serviceId    Int
+  service      Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name         String
+  imageUrl     String?
+  category     String?
+  requirements String? // JSON-encoded list of required fields for checkout
+  price        Decimal
+  deliveryDays Int
+  details      String?
+  isActive     Boolean  @default(true)
+  features     String?
+  createdAt    DateTime @default(now())
+
+  orderItems OrderItem[]
+
+  @@index([serviceId])
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  total     Decimal
+  currency  String   @default("NGN")
+  status    String   @default("PENDING") // PENDING | PAID | CANCELLED | REFUNDED
+  rejectionReason String?
+  reference String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items                OrderItem[]
+  payment              Payment?
+  qualifyingReferral   Referral?             @relation("QualifyingOrder")
+  affiliateCommissions AffiliateCommission[]
+  statusHistory        OrderStatusHistory[]
+  notifications        Notification[]
+  supportTickets       SupportTicket[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id               Int            @id @default(autoincrement())
+  orderId          Int
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  servicePackageId Int
+  servicePackage   ServicePackage @relation(fields: [servicePackageId], references: [id])
+  quantity         Int            @default(1)
+  unitPrice        Decimal
+  totalPrice       Decimal
+  requirements     String? // JSON-encoded checkout info (email, social media, etc.)
+  createdAt        DateTime       @default(now())
+
+  @@index([orderId])
+  @@index([servicePackageId])
+}
+
+model Payment {
+  id                Int      @id @default(autoincrement())
+  orderId           Int?     @unique
+  order             Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId            Int?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String
+  providerReference String?
+  amount            Decimal
+  status            String   @default("PENDING") // PENDING | SUCCESS | FAILED
+  currency          String   @default("NGN")
+  verifiedAt        DateTime?
+  creditedAt        DateTime?
+  meta              String? // JSON-encoded payment metadata (SQLite has no Json scalar)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  transaction       Transaction?
+
+  @@index([orderId])
+  @@index([userId, provider, status])
+  @@unique([provider, providerReference])
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  amount    Decimal
+  currency  String   @default("NGN")
+  reference String?
+  paymentId Int?     @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([reference])
+}
+
+model SupportTicket {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  subject    String
+  message    String
+  status     String   @default("OPEN")
+  category   String   @default("OTHER")
+  priority   String   @default("NORMAL")
+  orderId    Int?
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  assignedTo Int?
+  assignee   User?    @relation("TicketAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  messages   TicketMessage[]
+  notifications Notification[]
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status, priority])
+}
+
+model TicketMessage {
+  id         Int           @id @default(autoincrement())
+  ticketId   Int
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId   Int
+  sender     User          @relation("TicketMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  message    String
+  isInternal Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  ticketId  Int?
+  ticket    SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  orderId   Int?
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead, createdAt])
+}
+
+model OrderStatusHistory {
+  id            Int      @id @default(autoincrement())
+  orderId       Int
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  previousStatus String?
+  newStatus     String
+  reason        String?
+  changedBy     Int?
+  changedAt     DateTime @default(now())
+
+  @@index([orderId, changedAt])
+}
+
+model Affiliate {
+  id             Int                   @id @default(autoincrement())
+  userId         Int                   @unique
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code           String                @unique
+  commissionRate Decimal                 @default(0.01)
+  isActive       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  referrals      Referral[]
+  commissions    AffiliateCommission[]
+  withdrawals    AffiliateWithdrawal[]
+}
+
+model Referral {
+  id                     Int                   @id @default(autoincrement())
+  affiliateId            Int
+  affiliate              Affiliate             @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  referredUserId         Int                   @unique
+  referredUser           User                  @relation("ReferredUser", fields: [referredUserId], references: [id], onDelete: Cascade)
+  status                 String                @default("REGISTERED") // REGISTERED | PENDING_QUALIFICATION | QUALIFIED | COMMISSION_PENDING | COMMISSION_AVAILABLE | DISQUALIFIED
+  qualifyingOrderId      Int?                  @unique
+  qualifyingOrder        Order?                @relation("QualifyingOrder", fields: [qualifyingOrderId], references: [id], onDelete: SetNull)
+  createdAt              DateTime              @default(now())
+  qualifiedAt            DateTime?
+  disqualifiedAt         DateTime?
+  disqualificationReason String?
+  commissions            AffiliateCommission[]
+
+  @@index([affiliateId])
+  @@index([status])
+}
+
+model AffiliateCommission {
+  id             Int                   @id @default(autoincrement())
+  affiliateId    Int
+  affiliate      Affiliate             @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  referralId     Int
+  referral       Referral              @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  orderId        Int
+  order          Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderAmount    Decimal
+  rate           Decimal
+  amount         Decimal
+  status         String                @default("PENDING") // PENDING | AVAILABLE | REVERSED | CANCELLED
+  availableAt    DateTime?
+  createdAt      DateTime              @default(now())
+  reversedAt     DateTime?
+  reason         String?
+  adjustmentOfId Int?
+  adjustmentOf   AffiliateCommission?  @relation("CommissionAdjustments", fields: [adjustmentOfId], references: [id], onDelete: SetNull)
+  adjustments    AffiliateCommission[] @relation("CommissionAdjustments")
+
+  @@unique([affiliateId, orderId])
+  @@index([affiliateId, status])
+  @@index([referralId])
+}
+
+model AffiliateWithdrawal {
+  id             Int       @id @default(autoincrement())
+  affiliateId    Int
+  affiliate      Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  amount         Decimal
+  paymentMethod  String
+  paymentDetails String?
+  status         String    @default("PENDING") // PENDING | APPROVED | REJECTED | PAID | CANCELLED
+  reason         String?
+  requestedAt    DateTime  @default(now())
+  processedAt    DateTime?
+  processedById  Int?
+
+  @@index([affiliateId, status])
+}
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
