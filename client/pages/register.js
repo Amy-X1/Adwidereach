@@ -80,7 +80,7 @@ export default function Register() {
 
   return (
     <Layout>
-      <Head><title>Register — NimbusWorks</title></Head>
+      <Head><title>Register — AdWideReach</title></Head>
       <section className="section max-w-3xl">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Create your account</h1>

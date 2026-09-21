@@ -24,7 +24,7 @@ export default function Services() {
 
   return (
     <Layout>
-      <Head><title>Services — NimbusWorks</title></Head>
+      <Head><title>Services — AdWideReach</title></Head>
       <section className="section">
         <div className="max-w-2xl">
           <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">Services</span>

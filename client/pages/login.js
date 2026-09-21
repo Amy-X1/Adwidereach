@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <Layout>
-      <Head><title>Login — NimbusWorks</title></Head>
+      <Head><title>Login — AdWideReach</title></Head>
       <section className="section max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Welcome back</h1>

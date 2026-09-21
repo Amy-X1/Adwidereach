@@ -54,8 +54,8 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full max-w-full overflow-x-clip border-b border-gray-200/70 dark:border-gray-800/70 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg">
       <nav className="mx-auto flex h-14 w-full max-w-screen-2xl items-center justify-between gap-2 px-3 min-[400px]:h-16 min-[400px]:gap-3 min-[400px]:px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex min-w-0 shrink-0 items-center gap-1.5 font-extrabold tracking-tight text-gray-900 dark:text-white text-base min-[400px]:gap-2 min-[400px]:text-lg sm:text-xl">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm text-white shadow-lg shadow-brand-600/30 min-[400px]:h-9 min-[400px]:w-9 min-[400px]:text-base">N</span>
-          <span className="truncate whitespace-nowrap">Nimbus<span className="text-brand-600">Works</span></span>
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm text-white shadow-lg shadow-brand-600/30 min-[400px]:h-9 min-[400px]:w-9 min-[400px]:text-base">A</span>
+          <span className="truncate whitespace-nowrap">AdWide<span className="text-brand-600">Reach</span></span>
         </Link>
 
         <div className="hidden nav:flex min-w-0 items-center gap-4 lg:gap-6 xl:gap-10">

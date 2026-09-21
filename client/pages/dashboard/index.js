@@ -73,7 +73,7 @@ function DashboardContent() {
 
   return (
     <DashboardLayout>
-      <Head><title>My Profile — NimbusWorks</title></Head>
+      <Head><title>My Profile — AdWideReach</title></Head>
       <section className="section">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>

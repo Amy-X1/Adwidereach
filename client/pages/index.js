@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <Head><title>NimbusWorks — Modern Business Platform</title></Head>
+      <Head><title>AdWideReach — Modern Business Platform</title></Head>
 
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50 to-transparent dark:from-brand-950/40" />
@@ -25,7 +25,7 @@ export default function Home() {
           <div className="animate-slide-up">
             <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">Now onboarding new businesses</span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-              Run your business on one modern platform
+              Get Your Business Seen. Reach More Customers.
             </h1>
             <p className="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-xl">
               Register in minutes, manage your profile, and let our team support your growth with tools built for speed, security, and simplicity.
@@ -69,7 +69,7 @@ export default function Home() {
       {showGuestCtas && (
         <section className="section">
           <div className="card overflow-hidden bg-gradient-to-br from-brand-600 to-brand-800 p-10 sm:p-16 text-center">
-            <h2 className="text-3xl font-bold text-white">Ready to join NimbusWorks?</h2>
+            <h2 className="text-3xl font-bold text-white">Ready to join AdWideReach?</h2>
             <p className="mt-3 text-brand-100 max-w-xl mx-auto">Create your account today and get instant access to your personal dashboard.</p>
             <Link href="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-brand-700 hover:bg-brand-50 transition-colors">
               Create Free Account <FiArrowRight />
