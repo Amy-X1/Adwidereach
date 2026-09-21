@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api`,
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'https://adwidereach-3.onrender.com'}/api`,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
 });
 
 // Centralize 401 handling: if the token is invalid/expired, clear session
-// and bounce to /login (skip this on the login/register pages themselves).yy
+// and bounce to /login (skip this on the login/register pages themselves).
 api.interceptors.response.use(
   (res) => res,
   (error) => {
