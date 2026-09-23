@@ -11,13 +11,13 @@ const values = [
 export default function About() {
   return (
     <Layout>
-      <Head><title>About Us — NimbusWorks</title></Head>
+      <Head><title>About Us — AdWideReach</title></Head>
       <section className="section">
         <div className="max-w-3xl">
           <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">About Us</span>
           <h1 className="mt-4 text-4xl font-extrabold text-gray-900 dark:text-white">Building the backbone for modern businesses</h1>
           <p className="mt-5 text-gray-600 dark:text-gray-300 leading-relaxed">
-            NimbusWorks started with a simple idea: business owners shouldn't need a team of engineers to get a secure,
+            AdWideReach started with a simple idea: business owners shouldn't need a team of engineers to get a secure,
             professional online presence with real account management. Today we help businesses of every size register,
             manage their customers, and grow — all from one dependable platform.
           </p>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
-import { FiSave, FiLock, FiTrash2, FiUser, FiCalendar } from 'react-icons/fi';
+import { FiSave, FiLock, FiTrash2, FiUser, FiCalendar, FiEye, FiEyeOff } from 'react-icons/fi';
 import DashboardLayout from '../../components/DashboardLayout';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import FormField from '../../components/FormField';
@@ -20,6 +20,7 @@ function DashboardContent() {
     businessName: user.businessName || '', address: user.address,
   });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+  const [showPw, setShowPw] = useState({ currentPassword: false, newPassword: false, confirmNewPassword: false });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -73,7 +74,7 @@ function DashboardContent() {
 
   return (
     <DashboardLayout>
-      <Head><title>My Profile — NimbusWorks</title></Head>
+      <Head><title>My Profile — AdWideReach</title></Head>
       <section className="section">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
@@ -161,13 +162,28 @@ function DashboardContent() {
         {tab === 'security' && (
           <form onSubmit={changePassword} className="card p-7 sm:p-8 space-y-5 max-w-md">
             <FormField label="Current Password" required error={errors.currentPassword}>
-              <input type="password" className="input-field" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} />
+              <div className="relative">
+                <input type={showPw.currentPassword ? 'text' : 'password'} className="input-field pr-11" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} />
+                <button type="button" onClick={() => setShowPw({ ...showPw, currentPassword: !showPw.currentPassword })} aria-label={showPw.currentPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                  {showPw.currentPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </FormField>
             <FormField label="New Password" required error={errors.newPassword}>
-              <input type="password" className="input-field" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} />
+              <div className="relative">
+                <input type={showPw.newPassword ? 'text' : 'password'} className="input-field pr-11" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} />
+                <button type="button" onClick={() => setShowPw({ ...showPw, newPassword: !showPw.newPassword })} aria-label={showPw.newPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                  {showPw.newPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </FormField>
             <FormField label="Confirm New Password" required error={errors.confirmNewPassword}>
-              <input type="password" className="input-field" value={pwForm.confirmNewPassword} onChange={(e) => setPwForm({ ...pwForm, confirmNewPassword: e.target.value })} />
+              <div className="relative">
+                <input type={showPw.confirmNewPassword ? 'text' : 'password'} className="input-field pr-11" value={pwForm.confirmNewPassword} onChange={(e) => setPwForm({ ...pwForm, confirmNewPassword: e.target.value })} />
+                <button type="button" onClick={() => setShowPw({ ...showPw, confirmNewPassword: !showPw.confirmNewPassword })} aria-label={showPw.confirmNewPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                  {showPw.confirmNewPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </FormField>
             <button disabled={saving} className="btn-primary w-full">{saving ? 'Updating...' : 'Change Password'}</button>
           </form>

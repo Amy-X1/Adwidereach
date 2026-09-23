@@ -41,7 +41,7 @@ export default function Contact() {
 
   return (
     <Layout>
-      <Head><title>Contact Us — NimbusWorks</title></Head>
+      <Head><title>Contact Us — AdWideReach</title></Head>
       <section className="section grid gap-12 lg:grid-cols-5">
         <div className="lg:col-span-2">
           <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">Contact</span>
@@ -49,7 +49,7 @@ export default function Contact() {
           <p className="mt-4 text-gray-600 dark:text-gray-300">Have a question about your account or our services? Send us a message and we'll respond within one business day.</p>
 
           <div className="mt-8 space-y-5">
-            {[[FiMapPin, '123 Market Street, Port Harcourt, Nigeria'], [FiPhone, '+234 800 000 0000'], [FiMail, 'hello@nimbusworks.com']].map(([Icon, text]) => (
+            {[[FiMapPin, '145 market road by adazi, Aba, Abia State NG'], [FiPhone, '+234 814 057 0354'], [FiMail, 'techj9252@gmail.com']].map(([Icon, text]) => (
               <div key={text} className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-600/10 text-brand-600 shrink-0"><Icon size={17} /></span>
                 {text}

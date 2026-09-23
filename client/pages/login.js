@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { FiLogIn } from 'react-icons/fi';
+import { FiLogIn, FiEye, FiEyeOff } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import FormField from '../components/FormField';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 export default function Login() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -34,7 +35,7 @@ export default function Login() {
 
   return (
     <Layout>
-      <Head><title>Login — NimbusWorks</title></Head>
+      <Head><title>Login — AdWideReach</title></Head>
       <section className="section max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Welcome back</h1>
@@ -48,7 +49,12 @@ export default function Login() {
             <input className="input-field" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="jane@company.com" />
           </FormField>
           <FormField label="Password" required error={errors.password}>
-            <input className="input-field" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+            <div className="relative">
+              <input className="input-field pr-11" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </FormField>
           <button disabled={loading} className="btn-primary w-full">
             {loading ? 'Signing in...' : <>Sign In <FiLogIn /></>}

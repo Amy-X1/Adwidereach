@@ -131,42 +131,7 @@ row's `role` field from `USER` to `ADMIN`.
 
 ---
 
-## 4. Environment Variables (`server/.env`)
 
-```ini
-PORT=5000
-NODE_ENV=development
-CLIENT_URL=http://localhost:3000
-
-# SQLite (default, zero-config):
-DATABASE_URL="file:./dev.db"
-# PostgreSQL example:
-# DATABASE_URL="postgresql://user:password@localhost:5432/business_app?schema=public"
-
-JWT_SECRET=replace_this_with_a_long_random_string_at_least_32_chars
-JWT_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=replace_this_with_a_different_long_random_string
-JWT_REFRESH_EXPIRES_IN=30d
-
-BCRYPT_SALT_ROUNDS=12
-
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX=200
-
-ADMIN_EMAIL=admin@business.com
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=Admin@12345
-```
-
-**Never commit `.env` to source control.** `JWT_SECRET` and `JWT_REFRESH_SECRET` must be
-long, random strings in production (e.g. `openssl rand -hex 32`).
-
-The client reads the API URL from `client/.env.local`:
-```ini
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-```
-
----
 
 ## 5. Database Schema
 

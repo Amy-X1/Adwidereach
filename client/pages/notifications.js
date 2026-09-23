@@ -32,7 +32,7 @@ function Notifications() {
 
   return (
     <DashboardLayout>
-      <Head><title>Notifications — NimbusWorks</title></Head>
+      <Head><title>Notifications — AdWideReach</title></Head>
       <section className="section">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div><h1 className="text-2xl font-bold">Notifications</h1><p className="mt-1 text-sm text-gray-500">Updates about your orders, payments, and support tickets.</p></div>

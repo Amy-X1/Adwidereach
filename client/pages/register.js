@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { FiUserPlus } from 'react-icons/fi';
+import { FiUserPlus, FiEye, FiEyeOff } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import FormField from '../components/FormField';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,8 @@ const initial = {
 
 export default function Register() {
   const [form, setForm] = useState(initial);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -80,7 +82,7 @@ export default function Register() {
 
   return (
     <Layout>
-      <Head><title>Register — NimbusWorks</title></Head>
+      <Head><title>Register — AdWideReach</title></Head>
       <section className="section max-w-3xl">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Create your account</h1>
@@ -162,10 +164,20 @@ export default function Register() {
             <legend className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Security</legend>
             <div className="grid gap-5 sm:grid-cols-2">
               <FormField label="Password" required error={errors.password}>
-                <input className="input-field" type="password" value={form.password} onChange={set('password')} placeholder="••••••••" />
+                <div className="relative">
+                  <input className="input-field pr-11" type={showPassword ? 'text' : 'password'} value={form.password} onChange={set('password')} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
               </FormField>
               <FormField label="Confirm Password" required error={errors.confirmPassword}>
-                <input className="input-field" type="password" value={form.confirmPassword} onChange={set('confirmPassword')} placeholder="••••••••" />
+                <div className="relative">
+                  <input className="input-field pr-11" type={showConfirmPassword ? 'text' : 'password'} value={form.confirmPassword} onChange={set('confirmPassword')} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
               </FormField>
             </div>
             <p className="text-xs text-gray-400">Use 8+ characters with uppercase, lowercase, a number, and a symbol.</p>

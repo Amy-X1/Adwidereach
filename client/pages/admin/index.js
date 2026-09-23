@@ -181,7 +181,7 @@ function AdminContent() {
   return (
     <DashboardLayout>
     {/* <Layout> */}
-      <Head><title>Admin Dashboard — NimbusWorks</title></Head>
+      <Head><title>Admin Dashboard — AdWideReach</title></Head>
       <section className="section">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Admin Dashboard</h1>
