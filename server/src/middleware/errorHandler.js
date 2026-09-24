@@ -8,7 +8,7 @@ function notFound(req, res, next) {
 // Centralized error handler - must be registered last.
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
-  let { statusCode, message, errors } = err;
+  const { statusCode, message, errors } = err;
 
   // Prisma unique constraint violation
   if (err.code === 'P2002') {
@@ -43,6 +43,8 @@ function errorHandler(err, req, res, next) {
     success: false,
     message,
     errors: errors || undefined,
+    code: err.code || undefined,
+    email: err.email || undefined,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
 }

@@ -64,6 +64,40 @@ const loginValidation = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
+const forgotPasswordValidation = [
+  body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+];
+
+const resetPasswordValidation = [
+  body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+  body('code').trim().notEmpty().withMessage('Reset code is required').isLength({ min: 6, max: 6 }).withMessage('Code must be 6 digits'),
+  body('newPassword')
+    .notEmpty().withMessage('New password is required')
+    .matches(STRONG_PASSWORD_REGEX)
+    .withMessage('Password must be at least 8 characters and include uppercase, lowercase, a number and a special character'),
+  body('confirmNewPassword').custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error('Passwords do not match');
+    }
+    return true;
+  }),
+];
+
+const verifyEmailValidation = [
+  body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+  body('code').trim().notEmpty().withMessage('Verification code is required').isLength({ min: 6, max: 6 }).withMessage('Code must be 6 digits'),
+];
+
+const resendVerificationValidation = [
+  body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+];
+
+const announcementValidation = [
+  body('title').trim().notEmpty().withMessage('Title is required').isLength({ min: 3, max: 120 }).withMessage('Title must be 3-120 characters'),
+  body('message').trim().notEmpty().withMessage('Message is required').isLength({ min: 3, max: 2000 }).withMessage('Message must be 3-2000 characters'),
+  body('audience').optional().isIn(['ALL', 'USERS', 'ADMINS']).withMessage('Audience must be ALL, USERS or ADMINS'),
+];
+
 const updateProfileValidation = [
   body('fullName').optional().trim().isLength({ min: 2, max: 100 }),
   body('phone').optional().trim().matches(PHONE_REGEX).withMessage('Invalid phone number'),
@@ -107,6 +141,11 @@ const idParamValidation = [param('id').isInt({ min: 1 }).toInt()];
 module.exports = {
   registerValidation,
   loginValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
+  verifyEmailValidation,
+  resendVerificationValidation,
+  announcementValidation,
   updateProfileValidation,
   changePasswordValidation,
   contactValidation,

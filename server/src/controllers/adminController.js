@@ -176,6 +176,58 @@ const replyToContactMessage = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { message } });
 });
 
+// POST /api/admin/announcements — send a broadcast notification to users.
+// Body: { title, message, audience = 'ALL' }.
+const sendAnnouncement = asyncHandler(async (req, res) => {
+  const title = String(req.body.title || '').trim();
+  const message = String(req.body.message || '').trim();
+  const audience = String(req.body.audience || 'ALL').toUpperCase();
+
+  let where = {};
+  if (audience === 'USERS') where = { role: 'USER', isActive: true };
+  else if (audience === 'ADMINS') where = { role: 'ADMIN', isActive: true };
+  else where = { isActive: true };
+
+  const recipients = await prisma.user.findMany({ where, select: { id: true } });
+  if (recipients.length === 0) throw new ApiError(404, 'No recipients found for this audience');
+
+  // Bulk-insert in chunks so very large user bases don't blow the query size.
+  const rows = recipients.map((u) => ({ userId: u.id, type: 'ANNOUNCEMENT', title, message }));
+  const CHUNK = 500;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    await prisma.notification.createMany({ data: rows.slice(i, i + CHUNK) });
+  }
+
+  // Keep a copy of the announcement itself (visible in the admin room history).
+  const record = await prisma.setting.create({
+    data: {
+      key: `ANNOUNCEMENT:${Date.now()}:${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      value: JSON.stringify({ title, message, audience, sentBy: req.user.id, sentAt: new Date().toISOString(), recipients: recipients.length }),
+      description: 'Admin announcement (auto-managed)',
+    },
+  });
+
+  await logAudit(prisma, { userId: req.user.id, action: 'ADMIN_SEND_ANNOUNCEMENT', details: `${title} → ${audience} (${recipients.length} users)`, req });
+
+  res.status(201).json({ success: true, message: `Announcement sent to ${recipients.length} user(s)`, data: { recipients: recipients.length, announcementId: record.key } });
+});
+
+// GET /api/admin/announcements — history of sent announcements.
+const listAnnouncements = asyncHandler(async (req, res) => {
+  const rows = await prisma.setting.findMany({
+    where: { key: { startsWith: 'ANNOUNCEMENT:' } },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+  const announcements = rows.map((r) => {
+    let parsed = {};
+    try { parsed = JSON.parse(r.value); } catch (e) { parsed = {}; }
+    return { id: r.key, title: parsed.title || '(untitled)', message: parsed.message || '', audience: parsed.audience || 'ALL', sentBy: parsed.sentBy || null, sentAt: parsed.sentAt || r.createdAt, recipients: parsed.recipients ?? null, createdAt: r.createdAt };
+  });
+  res.json({ success: true, data: { announcements } });
+});
+
 module.exports = {
   getStats, listUsers, getUser, updateUser, deleteUser, exportUsersCsv, listContactMessages, replyToContactMessage,
+  sendAnnouncement, listAnnouncements,
 };

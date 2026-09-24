@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FiGift, FiList, FiCreditCard, FiPlusCircle, FiLifeBuoy, FiUsers, FiSettings, FiLogOut, FiX } from 'react-icons/fi';
+import { FiGift, FiList, FiCreditCard, FiPlusCircle, FiLifeBuoy, FiUsers, FiSettings, FiLogOut, FiX, FiMegaphone } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 const items = [
@@ -21,6 +21,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
   // Admins don't see the shared user Support item; they use Support Center (/admin/support) instead.
   const navItems = items
     .filter((it) => !(user?.role === 'ADMIN' && it.href === '/dashboard/support'))
+    .filter((it) => !(user?.role === 'ADMIN' && it.href === '/dashboard/wallet'))
     .map((it) => (user?.role === 'ADMIN' && it.adminHref ? { ...it, href: it.adminHref } : it));
 
   const isActive = (href) => router.pathname === href || router.pathname.startsWith(href + '/');
@@ -38,7 +39,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       )}
 
       <aside
-        className={`fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 max-w-[85vw] overflow-y-auto border-r border-gray-200 bg-white shadow-xl shadow-black/10 transition-transform duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-950 dark:shadow-black/40 ${
+        className={`fixed left-0 top-14 z-40 h-[calc(100dvh-3.5rem)] w-64 max-w-[85vw] overflow-y-auto border-r border-gray-200 bg-white shadow-xl shadow-black/10 transition-transform duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-950 dark:shadow-black/40 min-[400px]:top-16 min-[400px]:h-[calc(100dvh-4rem)] ${
           open ? 'translate-x-0' : '-translate-x-full'
         } lg:max-w-none lg:translate-x-0 lg:shadow-none`}
       >
@@ -63,6 +64,12 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
                 </Link>
               );
             })}
+
+            {user?.role === 'ADMIN' && (
+              <Link href="/admin/announcements" className={linkClass(router.pathname.startsWith('/admin/announcements'))} onClick={onClose}>
+                <FiMegaphone /> Announcements
+              </Link>
+            )}
 
             {user?.role === 'ADMIN' && (
               <Link href="/admin/support" className={linkClass(router.pathname.startsWith('/admin/support'))} onClick={onClose}>

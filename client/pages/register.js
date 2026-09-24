@@ -91,7 +91,10 @@ export default function Register() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="card p-7 sm:p-10 space-y-6">
+        <form onSubmit={handleSubmit} autoComplete="off" className="card p-7 sm:p-10 space-y-6">
+          {/* Dummy fields to absorb browser password-manager autofill */}
+          <input type="text" name="prevent-autofill-username" autoComplete="username" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} />
+          <input type="password" name="prevent-autofill-password" autoComplete="new-password" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} />
           {form.referralCode && <p className="rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-2 text-sm text-brand-700 dark:text-brand-300">Referral code applied: {form.referralCode}</p>}
           <fieldset className="space-y-5">
             <legend className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Personal Information</legend>
@@ -100,12 +103,12 @@ export default function Register() {
                 <input className="input-field" value={form.fullName} onChange={set('fullName')} placeholder="Jane Doe" />
               </FormField>
               <FormField label="Username" required error={errors.username}>
-                <input className="input-field" value={form.username} onChange={set('username')} placeholder="janedoe" />
+                <input className="input-field" name="register-username" autoComplete="off" value={form.username} onChange={set('username')} placeholder="janedoe" />
               </FormField>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               <FormField label="Email Address" required error={errors.email}>
-                <input className="input-field" type="email" value={form.email} onChange={set('email')} placeholder="jane@company.com" />
+                <input className="input-field" type="email" name="register-email" autoComplete="off" value={form.email} onChange={set('email')} placeholder="jane@company.com" />
               </FormField>
               <FormField label="Phone Number" required error={errors.phone}>
                 <input className="input-field" value={form.phone} onChange={set('phone')} placeholder="+15551234567" />
@@ -165,7 +168,7 @@ export default function Register() {
             <div className="grid gap-5 sm:grid-cols-2">
               <FormField label="Password" required error={errors.password}>
                 <div className="relative">
-                  <input className="input-field pr-11" type={showPassword ? 'text' : 'password'} value={form.password} onChange={set('password')} placeholder="••••••••" />
+                  <input className="input-field pr-11" type={showPassword ? 'text' : 'password'} name="register-new-password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder="••••••••" />
                   <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                   </button>
@@ -173,7 +176,7 @@ export default function Register() {
               </FormField>
               <FormField label="Confirm Password" required error={errors.confirmPassword}>
                 <div className="relative">
-                  <input className="input-field pr-11" type={showConfirmPassword ? 'text' : 'password'} value={form.confirmPassword} onChange={set('confirmPassword')} placeholder="••••••••" />
+                  <input className="input-field pr-11" type={showConfirmPassword ? 'text' : 'password'} name="register-confirm-password" autoComplete="new-password" value={form.confirmPassword} onChange={set('confirmPassword')} placeholder="••••••••" />
                   <button type="button" onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                   </button>

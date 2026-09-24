@@ -2,9 +2,11 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import DashboardLayout from '../../../components/DashboardLayout';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../../lib/api';
+
+const DESCRIPTION_MAX = 2000;
 
 function ServiceDetail() {
   const router = useRouter();
@@ -20,6 +22,13 @@ function ServiceDetail() {
   const [requirementsData, setRequirementsData] = useState({});
   const [placed, setPlaced] = useState(null);
   const [paySettings, setPaySettings] = useState(null);
+  // Optional extras on every order: description + ~30 min business video
+  const [description, setDescription] = useState('');
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoInfo, setVideoInfo] = useState(null);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const videoInputRef = useRef(null);
 
   useEffect(() => {
     api.get('/settings/payment').then((res) => setPaySettings(res.data.data.settings || {})).catch(() => setPaySettings({}));
@@ -60,6 +69,7 @@ function ServiceDetail() {
   );
 
   // Base checkout info required for every order, plus the package's own required fields
+  // Description + video are OPTIONAL extras rendered separately below.
   const baseRequired = ['Email', 'Social Media Name', 'Social Media URL'];
   const packageRequired = (() => {
     let reqs = [];
@@ -158,6 +168,62 @@ function ServiceDetail() {
               </div>
             </div>
             <div className="mt-4">
+              <h4 className="font-semibold">Description <span className="text-xs font-normal text-gray-500">(optional)</span></h4>
+              <p className="text-xs text-gray-500 mt-1">Add a description of what you want.</p>
+              <textarea
+                className="mt-2 w-full px-3 py-2 border rounded text-black min-h-[110px]"
+                maxLength={DESCRIPTION_MAX}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add a description of what you want, e.g. goals for this promotion, target audience, style, links…"
+              />
+              <p className="mt-1 text-right text-xs text-gray-400">{description.length}/{DESCRIPTION_MAX}</p>
+            </div>
+            <div className="mt-4">
+              <h4 className="font-semibold">Business video <span className="text-xs font-normal text-gray-500">(optional, max ~30 mins)</span></h4>
+              <p className="text-xs text-gray-500 mt-1">Add a short video of your business page. We&apos;ll check it&apos;s around 30 minutes or shorter.</p>
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded file:border-0 file:bg-brand-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-700"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  setVideoUrl('');
+                  setVideoInfo(null);
+                  if (!f) { setVideoFile(null); return; }
+                  if (!String(f.type || '').startsWith('video/')) { toast.error('Please choose a video file'); e.target.value = ''; return; }
+                  // Pre-check duration in the browser (~30 min limit)
+                  const url = URL.createObjectURL(f);
+                  const vid = document.createElement('video');
+                  vid.preload = 'metadata';
+                  vid.onloadedmetadata = () => {
+                    URL.revokeObjectURL(url);
+                    const secs = vid.duration || 0;
+                    const mins = secs / 60;
+                    if (secs && mins > 30.5) {
+                      toast.error(`Video is ~${mins.toFixed(0)} mins — please use one that is 30 minutes or shorter`);
+                      setVideoFile(null);
+                      setVideoInfo(null);
+                      if (videoInputRef.current) videoInputRef.current.value = '';
+                      return;
+                    }
+                    setVideoFile(f);
+                    setVideoInfo({ name: f.name, sizeMB: (f.size / (1024 * 1024)).toFixed(1), mins: secs ? mins.toFixed(1) : null });
+                  };
+                  vid.onerror = () => { URL.revokeObjectURL(url); setVideoFile(f); setVideoInfo({ name: f.name, sizeMB: (f.size / (1024 * 1024)).toFixed(1), mins: null }); };
+                  vid.src = url;
+                }}
+              />
+              {videoInfo && (
+                <div className="mt-2 flex items-center justify-between gap-2 rounded border border-gray-200 px-3 py-2 text-sm dark:border-gray-700">
+                  <span className="truncate">🎬 {videoInfo.name} ({videoInfo.sizeMB} MB{videoInfo.mins ? ` · ~${videoInfo.mins} min` : ''})</span>
+                  <button type="button" className="shrink-0 text-red-500" onClick={() => { setVideoFile(null); setVideoInfo(null); setVideoUrl(''); if (videoInputRef.current) videoInputRef.current.value = ''; }}>Remove</button>
+                </div>
+              )}
+              {uploadingVideo && <p className="mt-2 text-sm text-brand-600">Uploading video… please keep this page open.</p>}
+            </div>
+            <div className="mt-4">
               <p className="font-semibold">Total: ₦{ (selectedPackage.price * quantity).toFixed(2) }</p>
             </div>
             {checkoutError && <p className="text-red-500 mt-2">{checkoutError}</p>}
@@ -171,8 +237,29 @@ function ServiceDetail() {
                   // require all checkout info before placing the order
                   const missing = requiredFields.filter((f) => !String(requirementsData[f] || '').trim());
                   if (missing.length > 0) { setCheckoutError(`Please fill in: ${missing.join(', ')}`); setProcessing(false); return; }
+                  // upload the video first (if one was chosen) so the order stores its URL
+                  let finalVideoUrl = videoUrl || '';
+                  if (videoFile && !finalVideoUrl) {
+                    setUploadingVideo(true);
+                    try {
+                      const form = new FormData();
+                      form.append('video', videoFile);
+                      const up = await api.post('/uploads/order-video', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 600000 });
+                      finalVideoUrl = up.data.data.url;
+                      setVideoUrl(finalVideoUrl);
+                    } catch (upErr) {
+                      setCheckoutError(upErr.response?.data?.message || 'Video upload failed — try a smaller/compressed video');
+                      setProcessing(false);
+                      setUploadingVideo(false);
+                      return;
+                    }
+                    setUploadingVideo(false);
+                  }
                   // create the order (PENDING until confirmed)
-                  const itemPayload = { servicePackageId: selectedPackage.id, quantity, requirements: Object.fromEntries(requiredFields.map((f) => [f, String(requirementsData[f] || '').trim()])) };
+                  const extras = {};
+                  if (description.trim()) extras['Description'] = description.trim().slice(0, DESCRIPTION_MAX);
+                  if (finalVideoUrl) extras['Video URL'] = finalVideoUrl;
+                  const itemPayload = { servicePackageId: selectedPackage.id, quantity, requirements: { ...Object.fromEntries(requiredFields.map((f) => [f, String(requirementsData[f] || '').trim()])), ...extras } };
                   const res = await api.post('/orders', { items: [itemPayload] });
                   const order = res.data.data.order;
                   setPlaced({ reference: order.reference, total: (selectedPackage.price * quantity).toFixed(2) });

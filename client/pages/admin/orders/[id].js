@@ -50,13 +50,28 @@ export default function OrderDetail() {
                   {order.items.map((item) => {
                     let info = {};
                     try { info = item.requirements ? JSON.parse(item.requirements) : {}; } catch (e) { info = {}; }
+                    const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://adwidereach-3.onrender.com').replace(/\/$/, '');
+                    const videoHref = info['Video URL'] ? (String(info['Video URL']).startsWith('http') ? info['Video URL'] : `${API_BASE}${info['Video URL']}`) : null;
                     return (
                       <div key={item.id} className="border rounded p-3 mb-2">
                         <p className="font-medium">{item.servicePackage?.name || `Package ${item.servicePackageId}`} × {item.quantity} — {order.currency} {Number(item.totalPrice || 0).toFixed(2)}</p>
                         {Object.keys(info).length > 0 && (
                           <ul className="mt-2 text-sm space-y-1">
-                            {Object.entries(info).map(([k, v]) => <li key={k}><strong>{k}:</strong> {String(v)}</li>)}
+                            {Object.entries(info).filter(([k]) => k !== 'Video URL').map(([k, v]) => (
+                              <li key={k}>
+                                {k === 'Description'
+                                  ? <><strong>Description:</strong> <span className="whitespace-pre-wrap">{String(v)}</span></>
+                                  : <><strong>{k}:</strong> {String(v)}</>}
+                              </li>
+                            ))}
                           </ul>
+                        )}
+                        {videoHref && (
+                          <div className="mt-3">
+                            <p className="text-sm font-medium">Business video:</p>
+                            <video src={videoHref} controls preload="metadata" className="mt-1 max-h-64 w-full rounded bg-black" />
+                            <a href={videoHref} target="_blank" rel="noreferrer" className="mt-1 inline-block text-sm text-brand-600 hover:underline">Open video in new tab</a>
+                          </div>
                         )}
                       </div>
                     );

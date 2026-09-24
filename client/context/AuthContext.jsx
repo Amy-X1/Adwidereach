@@ -53,7 +53,15 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (payload) => {
+    // NOTE: signup no longer auto-logs in — the account must be verified first.
     const { data } = await api.post('/auth/register', payload);
+    toast.success(data?.message || 'Account created! Check your email for the verification code.');
+    router.push(`/verify-email?email=${encodeURIComponent(data?.data?.email || payload.email || '')}`);
+    return data?.data;
+  };
+
+  const verifyEmail = async (email, code) => {
+    const { data } = await api.post('/auth/verify-email', { email, code });
     const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
     let localUser = null;
     try { localUser = stored ? JSON.parse(stored) : null; } catch (e) { localUser = null; }
@@ -61,9 +69,15 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.data.token);
     localStorage.setItem('user', JSON.stringify(merged));
     setUser(merged);
-    toast.success('Account created successfully!');
-    router.push('/dashboard');
-    return data.data.user;
+    toast.success(data?.message || 'Email verified — welcome!');
+    router.push(merged.role === 'ADMIN' ? '/admin' : '/dashboard');
+    return merged;
+  };
+
+  const resendVerification = async (email) => {
+    const { data } = await api.post('/auth/resend-verification', { email });
+    toast.success(data?.message || 'Verification code sent — check your email');
+    return data;
   };
 
   const logout = () => {
@@ -125,7 +139,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, setUser, setAvatar, removeAvatar }}>
+    <AuthContext.Provider value={{ user, loading, login, register, verifyEmail, resendVerification, logout, refreshUser, setUser, setAvatar, removeAvatar }}>
       {children}
     </AuthContext.Provider>
   );

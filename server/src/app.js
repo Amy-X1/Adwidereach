@@ -17,6 +17,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const affiliateRoutes = require('./routes/affiliateRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 const settingRoutes = require('./routes/settingRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
@@ -39,6 +40,8 @@ app.use(
   })
 );
 // Increase JSON limit to allow base64 image uploads (2MB image ≈ 2.7MB base64)
+// NOTE: order videos are NOT sent as JSON — they use multipart upload
+// (POST /api/uploads/order-video) so a long video never hits this limit.
 app.use(express.json({ limit: '6mb' }));
 app.use(express.urlencoded({ extended: true, limit: '6mb' }));
 app.use(cookieParser());
@@ -78,6 +81,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/affiliates', affiliateRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/uploads', uploadRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/tickets', ticketRoutes);

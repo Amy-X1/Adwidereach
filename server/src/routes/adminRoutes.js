@@ -2,10 +2,11 @@ const express = require('express');
 const { protect, authorize } = require('../middleware/auth');
 const adminAudit = require('../middleware/adminAudit');
 const validate = require('../middleware/validate');
-const { paginationValidation, idParamValidation, updateProfileValidation } = require('../utils/validators');
+const { paginationValidation, idParamValidation, updateProfileValidation, announcementValidation } = require('../utils/validators');
 
 const {
   getStats, listUsers, getUser, updateUser, deleteUser, exportUsersCsv, listContactMessages, replyToContactMessage,
+  sendAnnouncement, listAnnouncements,
 } = require('../controllers/adminController');
 const { listOrdersAdmin, getOrderAdmin, updateOrderStatus, deleteOrder } = require('../controllers/adminOrderController');
 const { adminStats: affiliateStats, listAdminAffiliates, updateAffiliate, adminReferrals, adminCommissions, adminWithdrawals, getWithdrawalById, processWithdrawal, getAffiliateById } = require('../controllers/affiliateController');
@@ -31,6 +32,10 @@ router.put('/users/:id', idParamValidation, updateProfileValidation, validate, u
 router.delete('/users/:id', idParamValidation, validate, deleteUser);
 router.get('/contacts', paginationValidation, validate, listContactMessages);
 router.patch('/contacts/:id/reply', replyToContactMessage);
+
+// Announcements (broadcast notifications to users)
+router.get('/announcements', listAnnouncements);
+router.post('/announcements', announcementValidation, validate, sendAnnouncement);
 
 // Support
 router.get('/support', listAdminTickets);

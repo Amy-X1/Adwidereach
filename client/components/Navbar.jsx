@@ -112,9 +112,17 @@ export default function Navbar() {
           ))}
         </div>
 
-        <button className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 nav:hidden dark:text-gray-200 dark:hover:bg-gray-800" onClick={() => setOpen(!open)} aria-label="Toggle menu" aria-expanded={open}>
-          {open ? <FiX size={22} /> : <FiMenu size={22} />}
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5 nav:hidden">
+          {!loading && user && (
+            <Link href="/notifications" aria-label="Open notifications" className="relative grid h-10 w-10 place-items-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800">
+              <FiBell size={20} />
+              {unreadCount > 0 && <span className="absolute right-1 top-1 min-w-[1.1rem] rounded-full bg-red-500 px-1 text-center text-[10px] font-semibold leading-4 text-white">{unreadCount}</span>}
+            </Link>
+          )}
+          <button className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 nav:hidden dark:text-gray-200 dark:hover:bg-gray-800" onClick={() => setOpen(!open)} aria-label="Toggle menu" aria-expanded={open}>
+            {open ? <FiX size={22} /> : <FiMenu size={22} />}
+          </button>
+        </div>
       </nav>
 
       {open && (
